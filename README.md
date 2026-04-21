@@ -1,86 +1,160 @@
-# Bio-Inspired Optimization for Insulin Planning
+# 🧬 Bio-Inspired Optimization for Insulin Planning
 
-This repository contains a research notebook that explores glucose-control strategies using multiple simulation and optimization approaches:
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10+"/>
+  <img src="https://img.shields.io/badge/Jupyter-Notebook-F37626?style=for-the-badge&logo=jupyter&logoColor=white" alt="Jupyter Notebook"/>
+  <img src="https://img.shields.io/badge/DEAP-Evolutionary%20Computation-4CAF50?style=for-the-badge" alt="DEAP"/>
+  <img src="https://img.shields.io/badge/SciPy-ODE%20Solver-8CAAE6?style=for-the-badge&logo=scipy&logoColor=white" alt="SciPy"/>
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License MIT"/>
+</p>
 
-- Rule-based/discrete glucose update models
-- Mini Bergman-inspired glucose-insulin dynamics
-- Hybrid ODE glucose model
-- Evolutionary search (genetic algorithms) for intervention planning
+<p align="center">
+  <img src="https://img.shields.io/badge/Domain-Computational%20Biology-blueviolet?style=flat-square" alt="Domain"/>
+  <img src="https://img.shields.io/badge/Optimization-Genetic%20Algorithms-orange?style=flat-square" alt="Genetic Algorithms"/>
+  <img src="https://img.shields.io/badge/Model-Bergman%20ODE-blue?style=flat-square" alt="Bergman ODE"/>
+  <img src="https://img.shields.io/badge/Status-Research%20Prototype-lightgrey?style=flat-square" alt="Status"/>
+</p>
 
-The core artifact is [Insulin_Optimization.ipynb](Insulin_Optimization.ipynb), which is organized as a progressive workflow from baseline simulations to optimization experiments.
+---
 
-## What The Notebook Covers
+> **Applying bio-inspired evolutionary algorithms to optimize insulin intervention plans using progressively richer glucose–insulin simulation models.**
 
-1. Baseline glucose simulations with meal, insulin, and exercise events
-2. Grid search and discrete genetic algorithm baselines
-3. DEAP-based evolutionary optimization
-4. Hybrid ODE + GA experiments
-5. Final standardized metrics table for cross-model comparison
+---
 
-## Environment
+## 📌 Overview
 
-Recommended:
+This project investigates how **genetic algorithms** and other bio-inspired search techniques can be used to plan optimal insulin dosing strategies for glucose control. It progresses from simple rule-based simulations through Bergman-inspired physiological ODE models, combining them with evolutionary optimization to achieve tight glucose regulation.
 
-- Python 3.10+
-- Jupyter Notebook or VS Code Notebook support
+The research is implemented in a single, self-contained Jupyter notebook: [`Insulin_Optimization.ipynb`](Insulin_Optimization.ipynb).
 
-Key packages used in the notebook:
+---
 
-- numpy
-- pandas
-- matplotlib
-- scipy
-- deap
+## 🧪 Simulated Patient Profiles
 
-The notebook includes `%pip` setup cells for these dependencies.
+Three virtual patient avatars are used across experiments to represent diverse physiological profiles:
 
-## Running
+| Avatar | Profile |
+|--------|---------|
+| **Emily** | Avatars/Emily.png |
+| **Lisa** | Avatars/Lisa.png |
+| **Sam** | Avatars/Sam.png |
 
-1. Open [Insulin_Optimization.ipynb](Insulin_Optimization.ipynb)
-2. Run cells top-to-bottom in a fresh kernel
-3. Review the final section: `Final Results Summary (Standardized Metrics)`
+---
 
-## Final Metrics (Important)
+## 🗂️ Notebook Sections
 
-The notebook now reports a standardized comparison table using shared trajectory-level metrics where possible:
+The notebook is structured as a progressive workflow across four main sections:
 
-- `mean_abs_error_target`
-- `rmse_target`
-- `time_in_range_pct` (70-180 mg/dL)
-- `minutes_below_70`
-- `minutes_above_180`
+### 1 · Baseline Simulation Models
+- Discrete rule-based glucose update equations (6-hour interval steps)
+- Accounts for scheduled meals, insulin injections, and exercise events
+- Establishes reference trajectories for comparison
 
-This avoids comparing raw objective values from different models directly, since each model uses different fitness formulations and penalty scales.
+### 2 · Optimization Baselines (Discrete Models)
+- **Grid Search**: exhaustive sweep over insulin doses on a simplified discrete model
+- **Discrete GA**: genetic algorithm without physiological time-delay or decay, exploring the insulin search space
 
-It also includes a follow-up fair-comparison cell that resamples trajectories to a common 1-minute grid before computing the same metrics.
+### 3 · DEAP-Based Evolutionary Optimization
+- Full evolutionary pipeline using the [DEAP](https://github.com/DEAP/deap) library
+- Penalty-based fitness function penalizing hypo- and hyperglycemia
+- Two-point crossover, adaptive mutation, and elitism
 
-## Quick Scan Results (Reviewer View)
+### 4 · Hybrid ODE + GA Experiments
+- Mini Bergman ODE model integrated via `scipy.integrate.solve_ivp`
+- GA runs on top of the ODE simulator with convergence diagnostics and trade-off analysis
+- Sensitivity analysis on key physiological parameters
 
-Snapshot from the latest fair-comparison (common 1-minute resampled) table in the notebook:
+---
 
-| Experiment                         | MAE to 100 | Time in 70-180 | Below 70 (min) | Above 180 (min) | Quick interpretation                 |
-| ---------------------------------- | ---------: | -------------: | -------------: | --------------: | ------------------------------------ |
-| Hybrid ODE + GA                    |       0.46 |        100.00% |              0 |               0 | Best overall in this run             |
-| Improved Mini Bergman              |       7.47 |         96.37% |            217 |               1 | Good control with hypo-risk episodes |
-| Mini Bergman (interval, resampled) |       9.14 |        100.00% |              0 |               0 | Stable but less precise than hybrid  |
-| Grid search (discrete, resampled)  |      25.76 |        100.00% |              0 |               0 | Simple baseline, not competitive     |
-| GA discrete (resampled)            |      45.39 |         52.28% |            115 |               0 | Weak physiological plausibility      |
+## 📊 Results
 
-Lower MAE is better. Higher time-in-range is better.
+All models are evaluated on a **standardized, trajectory-level metric set** after resampling to a common 1-minute grid, enabling fair cross-model comparison:
 
-For detailed values, see the final two notebook outputs:
+| Metric | Description |
+|--------|-------------|
+| `MAE to target` | Mean absolute error to target glucose of 100 mg/dL |
+| `Time in range` | % of time in the safe range 70–180 mg/dL |
+| `Below 70 (min)` | Minutes spent in hypoglycemia |
+| `Above 180 (min)` | Minutes spent in hyperglycemia |
 
-- Standardized metrics summary table
-- Fair-comparison (common-grid resampled) summary table
+### Fair-Comparison Summary (1-min resampled)
 
-## Interpretation Notes
+| Experiment | MAE to 100 | Time in 70–180 | Below 70 (min) | Above 180 (min) | Interpretation |
+|---|---:|---:|---:|---:|---|
+| **Hybrid ODE + GA** | **0.46** | **100.00%** | **0** | **0** | ✅ Best overall |
+| Improved Mini Bergman | 7.47 | 96.37% | 217 | 1 | Good control, hypo-risk episodes |
+| Mini Bergman (interval) | 9.14 | 100.00% | 0 | 0 | Stable, less precise than hybrid |
+| Grid Search (discrete) | 25.76 | 100.00% | 0 | 0 | Simple baseline, not competitive |
+| GA Discrete | 45.39 | 52.28% | 115 | 0 | Weak physiological plausibility |
 
-- Some models operate on coarse time steps (for example, 6-hour intervals), while others are minute-level.
-- The final table is intended for practical model comparison, not as a clinical-grade benchmark.
-- This project is research software and does not provide medical advice.
+> ↓ Lower MAE is better · ↑ Higher time-in-range is better
 
-## Repository Structure
+---
 
-- [Insulin_Optimization.ipynb](Insulin_Optimization.ipynb): main notebook
-- [Avatars/](Avatars/): avatar assets/profiles used by experiments
-- [README.md](README.md): project documentation
+## ⚙️ Technology Stack
+
+<p>
+  <img src="https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white" alt="NumPy"/>
+  <img src="https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white" alt="Pandas"/>
+  <img src="https://img.shields.io/badge/Matplotlib-11557C?style=flat-square" alt="Matplotlib"/>
+  <img src="https://img.shields.io/badge/SciPy-8CAAE6?style=flat-square&logo=scipy&logoColor=white" alt="SciPy"/>
+  <img src="https://img.shields.io/badge/DEAP-4CAF50?style=flat-square" alt="DEAP"/>
+</p>
+
+| Package | Purpose |
+|---------|---------|
+| `numpy` | Numerical simulation and array operations |
+| `pandas` | Results aggregation and metrics tables |
+| `matplotlib` | Glucose trajectory and convergence plots |
+| `scipy` | ODE integration (`solve_ivp`) |
+| `deap` | Evolutionary algorithm framework |
+
+All dependencies are installed inline via `%pip install` cells in the notebook — no separate setup step required.
+
+---
+
+## 🚀 Getting Started
+
+**Requirements:** Python 3.10+, Jupyter Notebook or VS Code with notebook support.
+
+```bash
+# Clone the repository
+git clone https://github.com/AMVamsi/Bio-Inspired-Optimization.git
+cd Bio-Inspired-Optimization
+
+# Open the notebook
+jupyter notebook Insulin_Optimization.ipynb
+```
+
+Run all cells top-to-bottom in a fresh kernel. The final section — **Final Results Summary (Standardized Metrics)** — contains the cross-model comparison tables.
+
+---
+
+## 📁 Repository Structure
+
+```
+Bio-Inspired-Optimization/
+├── Insulin_Optimization.ipynb   # Main research notebook
+├── Avatars/                     # Virtual patient avatar images
+│   ├── Emily.png
+│   ├── Lisa.png
+│   └── Sam.png
+├── Presentation.pdf             # Project presentation slides
+└── README.md                    # This file
+```
+
+---
+
+## ⚠️ Disclaimer
+
+This project is **research software** developed for academic exploration of bio-inspired optimization techniques applied to glucose-insulin dynamics. It does **not** constitute medical advice and is **not** intended for clinical use.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+<p align="center">Made with ❤️ for computational biology research</p>
